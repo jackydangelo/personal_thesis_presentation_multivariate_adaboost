@@ -1,0 +1,692 @@
+\documentclass[handout
+]{beamer}
+
+\usepackage{graphicx,epstopdf}
+
+  %-- CoCoA ------------------------------------------------------------
+
+\def\cocoa{\mbox{\rm 
+   C\kern-.13em o\kern-.07 em C\kern-.13em o\kern-.15em A}}
+
+
+   %-- COLOURS ------------------------------------------------------------
+
+\definecolor{red-}{rgb}{1.0,0.0,0.0}
+\definecolor{blue-}{rgb}{0.0,0.2,1.0}
+\definecolor{bluenight-}{rgb}{0.0,0.1,0.55}
+\definecolor{green-}{rgb}{0.0, 0.6, 0.0}
+\definecolor{gold}{rgb}{0.8,0.7,0.0}
+\definecolor{black}{rgb}{0.0,0.0,0.0}
+\definecolor{DarkGreen}{rgb}{0.0,0.5,0.0}
+\definecolor{LightGreen}{rgb}{0.8,1.0, 0.8}
+\definecolor{yellow}{rgb}{0.9,0.9,0.0}
+\definecolor{white}{rgb}{1.0,1.0,1.0}
+
+\def\red#1{{\textcolor{red-}{#1}}}
+\def\green#1{{\textcolor{green-}{#1}}}
+\def\blue#1{{\textcolor{blue-}{#1}}}
+\def\bluenight#1{{\textcolor{bluenight-}{#1}}}
+\def\gold#1{{\textcolor{gold}{\bf #1}}}
+\def\black#1{{\textcolor{black}{\bf #1}}}
+\def\yellow#1{{\textcolor{yellow}{#1}}}
+\def\white#1{{\textcolor{white}{#1}}}
+
+\usepackage{beamerthemesplit}
+\usepackage[english]{babel}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{amsfonts}
+%\usepackage{natbib}
+\usepackage{bbm}
+
+\usecolortheme[rgb={0.0,0.5,0.8}]{structure}
+\usetheme{Warsaw}
+\useoutertheme{infolines}
+\title[\yellow{Presentazione Tesi}]{\yellow{{Metodologia di boosting\\in ambito di problemi multiclasse}}}
+\author[D'Angelo Giacomo]{\red{Candidato: Giacomo D'Angelo }\\ \blue{Relatore: Prof. Fabrizio Malfanti} \\ \blue{Correlatore: Prof.ssa Eva Riccomagno}}
+\institute[]{Statistica Matematica e trattamento Informatico dei Dati \\Universit\`a degli studi di Genova\\ A.A. 2013/2014}
+\vspace{5 cm}
+\date[]{\black{}}
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+%slide1
+\begin{frame}
+\frametitle{\yellow{Introduzione}}
+L'argomento trattato nella mia tesi riguarda Adaboost nella sua versione multiclasse, avendo avuto un primo 
+approccio nella mia esperienza di tirocinio. 
+
+
+
+
+\end{frame}
+
+
+%slide1
+\begin{frame}
+\frametitle{\yellow{Adaboost}}
+\begin{itemize}
+\item Adaboost, diminutivo di Adaptive Boosting, consiste nel considerare classificatori deboli (weak), per combinarli e ottenerne uno pi\`u performante.
+\item \`E molto accurato, semplice e con diverse applicazioni possibili, risulta meno suscettibile al rischio di overfitting rispetto ad altri 
+algoritmi di apprendimento.
+\item I difetti che presenta questo filtro includono il fatto che risulta sensibile agli outliers e ai ``noisy'' data, ovvero ai dati sporchi.
+\end{itemize}
+\end{frame}
+
+%slide2
+\begin{frame}
+\frametitle{\yellow{Adaboost}}
+\begin{itemize}
+\item Sia {\begin{math}D = (x_1,y_1),(x_2,y_2),..,(x_m,y_m)\end{math}} \\
+con \begin{math}Y =\left\{-1,+1\right\}\end{math}.
+\item Si inizializza il vettore dei pesi: \begin{math} D_1(i)=1/m \end{math}
+\item Il processo viene effettuato per T iterazioni 
+\item Sia \begin{math} \mathcal{L} \end{math} weak learner iniziale una funzione di due variabili  \begin{math}(D,D_t)\end{math} a valori in {\begin{math}Y \end{math}}
+\end{itemize}
+\end{frame}
+
+%slide3
+\begin{frame}
+\frametitle{\yellow{Adaboost}}
+
+\begin{enumerate}
+
+ \item  \begin{math} h_t=\mathcal{L}(D,D_t)\end{math} viene fatto il train di un weak learner  \begin{math} h_t\end{math} da D usando la distribuzione
+\begin{math} D_t\end{math}
+\item \begin{math} \varepsilon_t=Pr{_i\sim D_i} [h_t(x_i\ne y_i)] \end{math}   misura l'errore di \begin{math} h_t\end{math}
+\item \begin{math} \alpha_t=\frac{1}{2}\ln\frac{1-\varepsilon_t}{\varepsilon_t}  \end{math} determina il peso di \begin{math} h_t\end{math}
+
+\item \begin{math} D_{t+1}(i)=\frac{D_t(i)}{Z_t}\times \begin{cases} exp(-\alpha_t) &  h_t(x_i)=y_i \\
+                                                         exp(\alpha_t) &  h_t(x_i)\ne y_i
+                                                       
+                                                      \end{cases} =\frac{D_t(i)exp(-\alpha_ty_ih_t(x_i))}{Z_t} \end{math} 
+Aggiorna la distribuzione, dove \begin{math}Z_t \end{math} \`e un fattore di normalizzazione che permette a \begin{math}D_{t+1} \end{math}
+di essere una distribuzione.
+
+\end{enumerate}
+L'output sar\`a:
+\begin{center}
+ \begin{math} h_{fin}(x)=sign(\sum_{t=1}^T \alpha_t h_t(x)) \end{math}
+\end{center}
+\end{frame}
+
+
+
+
+
+
+%slide4
+\begin{frame}
+\frametitle{\yellow{Adaboost - Considerazioni}}
+\begin{itemize}
+ \item L'algoritmo Adaboost viene applicato per casi dicotomici, ovvero dove le possibili uscite (i possibili risultati)
+possono essere due (es. vero/falso, s\`i/no, 1/0, ecc.).
+\item Esistono problemi in cui gli stati di classificazione sono pi\`u di due, 
+nasce quindi l'esigenza di adattare il filtro per supportare queste situazioni.
+\end{itemize}
+\end{frame}
+
+%slide5
+\begin{frame}
+\frametitle{\yellow{Adaboost}}
+\begin{itemize}
+ \item Nel corso dell'esperienza di tirocinio svolta presso Intelligrate srl, 
+ si ha affrontato un problema inerente alla predizioni di risultati calcistici.
+\item Calcio, problema multi-classe: i possibili eventi di qualsiasi partita sono tre 
+(vittoria squadra A, pareggio, vittoria squadra B).
+\item Vengono analizzate le principali varianti dell'algoritmo Adaboost nel caso 
+multivariato.
+\end{itemize}
+\end{frame}
+
+%slide6
+\begin{frame}
+\frametitle{\yellow{Adaboost.M1}}
+\`E la versione pi\`u semplice tra gli adaboost multiclasse.
+\begin{itemize}
+\item Per una sequenza di \begin{it}m\end{it} esempi di training 
+\begin{math}(x_1,y_1), ... (x_m,y_m)\end{math}\\
+con etichette \begin{math}y_i\in Y = \left\{1, ..., k\right\}\end{math}
+\item Si inizializza il vettore dei pesi: \begin{math} D_1(i)=1/m \end{math}
+\item Il processo viene effettuato per t=1,...,T
+\item Sia \begin{math} \mathcal{L} \end{math} weak learner iniziale
+\end{itemize}
+
+\end{frame}
+
+
+%slide7
+\begin{frame}
+\frametitle{\yellow{Adaboost.M1}}
+
+
+\begin{enumerate}
+
+\item  \begin{math} h_t=\mathcal{L}(D,D_t)\end{math} viene fatto il train di un weak learner
+    \begin{math} h_t\end{math} da D usando la distribuzione \begin{math} D_t\end{math}
+\item   \begin{math}\varepsilon = \sum_{i:h_t(x_i)\ne y_i}D_t(i)\end{math} misura l'errore di \begin{math} h_t\end{math}\\
+Se \begin{math}\varepsilon>\end{math}1/2, allora T=t-1 e il programma abortisce
+                          
+\item \begin{math} \alpha_t=\frac{\varepsilon_t}{1-\varepsilon_t}  \end{math} determina il peso di \begin{math} h_t\end{math}
+
+\item \begin{math} D_{t+1}(i)=\frac{D_t(i)}{Z_t}\times \begin{cases} \alpha_t &   h_t(x_i)=y_i \\ 1 & altrimenti \end{cases}\end{math} \\
+Aggiorna la distribuzione, dove \begin{math}Z_t \end{math} \`e un fattore di normalizzazione (scelto in 
+modo tale che \begin{math}D_{t+1} \end{math}
+sia una distribuzione).
+\end{enumerate}
+L'output sar\`a:
+\begin{center}
+\begin{math} h_{fin}(x)= \underset{y\in Y}{\operatorname{argmax}}\sum_{t:h_t(x)=y} log\frac{1}{\alpha_t} \end{math}
+\end{center}
+
+
+
+
+
+\end{frame}
+
+
+%slide8
+\begin{frame}
+\frametitle{\yellow{Adaboost.M1-Considerazioni}}
+
+Il principale svantaggio dell'Adaboost.M1 \`e quello di essere incapace di trattare le weak ipotesi con errore superiore a 1/2. L'errore previsto dall'ipotesi che genera casualmente l'etichetta \`e 1-1/k.
+\begin{itemize}
+\item \begin{math}k = 2\end{math} : ipotesi weak devono essere migliori della scelta casuale
+\item \begin{math}k > 2\end{math} : la richiesta che l'errore sia minore di 1/2 
+\`e piuttosto forte e spesso difficile da conoscere.
+
+\end{itemize}
+\end{frame}
+
+%slide9
+\begin{frame}
+\frametitle{\yellow{Adaboost.M2}}
+\begin{itemize}
+\item Viene permesso al weak learner di generare pi\`u ipotesi dove, piuttosto che identificare una singola etichetta in Y, sceglie un set di "plausibili" etichette.
+\item Si permette inoltre al weak learner di dare un grado di plausibilit\`a, cos\`i ogni ipotesi weak dar\`a un vettore \begin{math} \left[0,1\right]^k \end{math}.
+\item Mentre l'algoritmo weak acquista maggior potenza espressiva, si pone un 
+requisito sulle performance delle ipotesi weak piu` complesso.
+\item Nasce una misura di errore pi\`u sofisticata: la pseudo-loss, calcolata 
+sull'insieme di coppie di tutti gli esempi e etichette sbagliate.
+\end{itemize}
+\end{frame}
+
+%slide10
+\begin{frame}
+\frametitle{\yellow{Adaboost.M2}}
+Una \begin{it}mislabel\end{it}  \`e una coppia (\begin{it}i,y\end{it}) dove \begin{it}i\end{it}
+ \`e l'indice dell'esempio di training e \begin{it}y\end{it} \`e un'etichetta sbagliata associata 
+all'esempio \begin{it}i\end{it}. Sia \begin{it}B\end{it} l'insieme di tutte le \begin{it}mislabel\end{it} 
+\begin{math}B=\left\{(i,y) : i \in \left\{1, ..., m \right\}, y \ne y_i \right\}\end{math}. 
+Una distribuzione mislabel \`e una distribuzione definita su \begin{it}B\end{it}.
+\begin{itemize}
+\item Per una sequenza di \begin{it}m\end{it} esempi \begin{math}(x_1,y_1), ... (x_m,y_m)\end{math}\\
+con etichette \begin{math}y_i\in Y = \left\{1, ..., k\right\}\end{math} si inizializza il vettore dei pesi: \begin{math} D_1(i)=1/|B| per (i,y) \in B \end{math}
+\item Il processo \`e svolto per T volte specificando il numero di iterazioni
+\item Sia \begin{math} \mathcal{L} \end{math} weak learner iniziale
+
+\end{itemize}
+\end{frame}
+
+
+
+
+
+
+%slide11
+\begin{frame}
+\frametitle{\yellow{Adaboost.M2}}
+
+\begin{enumerate}
+
+\item Viene chiamato il weak learner \begin{math} \mathcal{L} \end{math}, fornendolo di una distribuzione
+    \begin{math} D_t\end{math} 
+\item Torna indietro un'ipotesi  \begin{math}h_t : X \times Y \to \left[0,1\right]\end{math}
+\item Viene calcolata la pseudo-loss di \begin{math}h_t\end{math}:
+\begin{center}
+\begin{math}\varepsilon = \frac{1}{2} \sum_{(i,y)\in B}D_t(i,y)(1-h_t(x_i,y_i)+h_t(x_i,y))\end{math}.
+\end{center}                      
+\item \begin{math} \alpha_t=\frac{\varepsilon_t}{1-\varepsilon_t}  \end{math} determina il peso di \begin{math} h_t\end{math}
+
+\item Si aggiorna \begin{math}D_t\end{math}:
+\begin{center}
+ \begin{math}
+  D_{t+1}(i,y)=\frac{D_t(i,y)}{Z_t}\alpha_t^{(1/2)(h_t(x_i,y_i)-h_t(x_i,y))}
+ \end{math}
+
+\end{center}
+                             
+dove \begin{math}Z_t \end{math} \`e un fattore di normalizzazione che rende \begin{math}D_{t+1} \end{math} 
+una distribuzione.
+
+
+\end{enumerate}
+L'output sar\`a:
+\begin{center}
+\begin{math} h_{fin}(x)= \underset{y\in Y}{\operatorname{argmax}}\sum_{t=1}^T log\frac{1}{\alpha_t}h_t(x,y) \end{math}
+\end{center}
+\end{frame}
+
+%slide 9
+\begin{frame}
+\frametitle{\yellow{Concetto Single/Multi-label}}
+\begin{itemize}
+\item La classificazione del singolo evento solitamente rimane sempre la stessa (single label).
+\end{itemize}
+\begin{table}[!h]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+Squadra A&Squadra B&Esito\\
+\hline
+Juventus&Chievo&1\\
+\hline
+Juventus&Chievo&1\\
+\hline
+Juventus&Chievo&X\\
+\hline
+\end{tabular}
+\end{table}
+\begin{itemize}
+\item L'oggetto partita Juventus-Chievo, nella fase di addestramento, ogni volta che sar\`a giocata, avr\`a la 
+possibilit\`a di essere classificata in maniera diversa, e quindi potr\`a assumere 
+pi\`u di un tipo di label (multi-label).
+\end{itemize}
+\end{frame}
+
+
+
+
+
+%slide 10
+\begin{frame}
+\frametitle{\yellow{Forward Stagewise Additive Modeling}}
+Molti modelli di classificazione e regressione possono essere scritti come combinazione lineare di modelli 
+pi\`u semplici:
+\begin{center}
+ \begin{math}
+  f(x)=\sum_{m=1}^M \beta_m b_m (x,\gamma_m)
+ \end{math}
+\end{center}
+Dove:
+\begin{itemize}
+ \item x \`e un dato di input
+ \item \begin{math}
+        \left\{ \beta_m,\gamma_m\right\}
+       \end{math} sono parametri del modello
+ \item \begin{math}
+         b_m(x,\gamma_m)
+       \end{math} sono altre funzioni arbitrarie di x.
+\end{itemize}
+\end{frame}
+
+
+
+%slide 11
+\begin{frame}
+\frametitle{\yellow{Forward Stagewise Additive Modeling}}
+\begin{itemize}
+ \item Generalmente, \begin{math} \left\{ \beta_m,\gamma_m\right\}\end{math} sono stimate per minimizzare alcune
+loss function L.
+\item Spesso questo procedimento 
+risulta essere piuttosto complicato, se per\`o si ottimizza la funzione su una funzione base del tipo:
+\begin{center}
+ \begin{math}
+  min \sum_{i=1}^M L(y_i,\beta b_m(x_i,\gamma)
+ \end{math}
+\end{center}
+il problema pu\`o essere risolto facilmente.
+\item Aggiungere sequenzialmente nuove funzioni base 
+per l'espansione della funzione \begin{math}f(x)\end{math} senza cambiare i parametri che sono stati aggiunti.
+\end{itemize}
+
+\end{frame}
+
+%slide 12
+\begin{frame}
+\frametitle{\yellow{Forward Stagewise Additive Modeling}}
+L'adaboost fitta un modello addittivo, attraverso il modello forward stagewise, dove:
+\begin{itemize}
+ \item La funzione base \begin{math}b_m\end{math} \`e un classificatore binario
+ \item La funzione oggetto \`e la loss esponenziale
+\begin{center}
+\begin{math} L(y,f) = e^{-yf(x)} \end{math}
+\end{center}
+\end{itemize}
+Il prossimo algoritmo si basa su queste considerazioni.
+\end{frame}
+
+
+
+
+
+
+%slide 14
+\begin{frame}
+\frametitle{\yellow{Adaboost SAMME}}
+
+\begin{itemize}
+\item Si inizializza il vettore dei pesi: \begin{math} D_1(i)=1/m \end{math}
+\item Il processo viene effettuato per T iterazioni
+\item Sia \begin{math} \mathcal{L} \end{math} il classificatore weak iniziale
+\end{itemize}
+\begin{enumerate}
+ \item Viene chiamato il weak learner \begin{math} \mathcal{L} \end{math}
+ \item In risposta, esso genera \begin{math} h_t \end{math} per i dati di 
+training usando i pesi
+\item \begin{math} \varepsilon_t = \sum_{i=1}^m D_t(i) 
+\mathbbm{1}(c_i\ne h_t(x_i))/\sum_{i=1}^m D_t(i)\end{math}   misura l'errore
+\item \begin{equation} \label{eq:alg} 
+\alpha_t=\frac{1}{2}\ln\frac{1-\varepsilon_t}{\varepsilon_t} + log(K-1) \end{equation} 
+\end{enumerate}
+
+\end{frame}
+
+%slide 15
+\begin{frame}
+\frametitle{\yellow{Adaboost SAMME}}
+\begin{itemize}
+ \item Si assegna:
+\begin{center}
+ \begin{math}
+  D_t(i) \leftarrow D_t(i) 
+ \end{math} exp\begin{math}
+                (\alpha_t\mathbbm{1}(y_i\ne h_t(x_i)))
+               \end{math}, i = 1, ..., m
+
+
+\end{center}
+
+\item Ri-normalizza \begin{math}
+                     D_i(t)
+                    \end{math}
+
+
+\end{itemize}
+L'output sar\`a:
+\begin{center}
+ \begin{math} C(x)= \underset{k}{\operatorname{argmax}}\sum_{(t=1)}^T \alpha_t  
+\mathbbm{1}(h_t(x) = k)\end{math}
+\end{center}
+
+\end{frame}
+
+
+%slide 16
+\begin{frame}
+\frametitle{\yellow{Adaboost SAMME}}
+\begin{itemize}
+ \item SAMME assomiglia molto alle versioni Adaboost, con la principale differenza in (\ref{eq:alg}).
+ \item In modo tale da avere \begin{math}\alpha_t\end{math} positivo, 
+si ha necessit\`a solo che \begin{math}1-\varepsilon_t >\end{math}1/K, o che l'accuratezza di 
+ogni classificatore weak sia migliore della classificazione casuale.
+\item Il termine addittivo \begin{math}
+                            log(K-1)
+                           \end{math} non \`e artificiale e crea un nuovo algoritmo 
+equivalente a fittare un modello addittivo in forward 
+stagewise attraverso la loss function esponenziale.
+ 
+\end{itemize}
+\end{frame}
+
+
+
+%slide 17
+\begin{frame}
+\frametitle{\yellow{Giustificazione teorica}}
+\begin{itemize}
+ \item Si costruisce una nuova funzione di perdita esponenziale, per adattarla al caso multi-classe.
+ \item Si pu\`o ricodificare l'output \begin{it}y\end{it} 
+con un vettore \textbf{y} \begin{it}K\end{it}-dimensionale, 
+dove tutte le entrate sono uguali a \begin{math}-\frac{1}{K-1} \end{math}
+ eccetto a 1 in posizione \begin{it}k \end{it} se \begin{it}y=k\end{it}, 
+cio\`e \begin{math} \textbf{y} =(y_1,...,y_K)^t\end{math} e:
+\begin{center}
+ \begin{equation}\label{eq:vet_mc}
+ y_k=\begin{cases}1 & y=k\\
+-\frac{1}{K-1} & y\ne k\end{cases}
+\end{equation}
+\end{center}
+\item La generalizzazione della funzione loss esponenziale al caso multivariato segue naturalmente:
+ \begin{center}
+ \begin{equation} \label{eq:loss_mc}
+L(\textbf{y,f}) =
+exp(-\frac{1}{K}(y_1f_1 + ... + y_Kf_K)) = (-\frac{1}{K}\begin{bf}y^tf\end{bf})
+\end{equation}
+\end{center}
+\end{itemize}
+\end{frame}
+
+
+
+%slide 18
+\begin{frame}
+\frametitle{\yellow{Giustificazione teorica}}
+\begin{itemize}
+ \item Si \`e interessati a:
+\begin{center}
+ \begin{math} \underset{\begin{bf}f(x)\end{bf}}{\operatorname{argmin}}\end{math} 
+E\begin{math}_{\begin{bf}Y|x\end{bf}} \end{math}exp
+\begin{math}(-\frac{1}{K}(Y_1f_1 + ... + Y_Kf_K))
+\end{math}
+\end{center}
+\begin{center}
+ soggetto al vincolo \begin{math}f_1 + ... + f_K = 0
+\end{math}
+\end{center}
+ 
+\item Attraverso il metodo dei moltiplicatori di Lagrange questo problema di ottimizzazione vincolata pu\`o 
+esser riscritto come:
+\begin{center}
+ \begin{math}
+  exp (-\frac{f_1(\textbf{x})}{K-1} Prob((y)=1|\textbf{x})) + \dots 
++ exp (-\frac{f_K(\textbf{x})}{K-1} Prob((y)=K|\textbf{x})) + 
+ \end{math}
+\end{center}
+\begin{center}
+ \begin{math}
+-  \lambda (f_1(\textbf{x}) + \dots + f_K(\textbf{x})
+ \end{math}
+
+\end{center}
+dove \begin{math}
+      \lambda 
+     \end{math}  \`e il moltiplicatore di Lagrange.
+
+
+\end{itemize}
+\end{frame}
+
+
+
+
+
+%slide 19
+\begin{frame}
+\frametitle{\yellow{Giustificazione teorica}}
+\begin{itemize}
+\item Si calcolano le derivate rispetto a 
+\begin{math}
+ f_k
+\end{math} e \begin{math}
+              \lambda
+             \end{math} e le si pone uguali a 0.
+\item Risolvendo questo sistema di equazioni, si ottiene:
+\begin{center}
+ \begin{equation}\label{eq:lagrange}
+ f_k^*(\textbf{x}) = (K-1) (log Prob(y=k|\textbf{x}) - \frac{1}{K}\sum_{k'=1}^K log Prob(y=k'|\textbf{x}))
+\end{equation}
+\end{center}
+con k=1,...,K
+\item Perci\`o:
+\begin{center}
+ \begin{math} \underset{k}{\operatorname{argmax}} f_k^*(\textbf{x}) = 
+\underset{k}{\operatorname{argmax}}Prob(y=k|\textbf{x})
+\end{math}
+\end{center}
+che \`e la regola di classificazione ottimale di Bayes per l'errore.
+\item Questo giustifica l'uso della 
+funzione loss esponenziale multiclasse. Inoltre, l'algoritmo SAMME \`e equivalente 
+al modello addittivo per forward stagewise utilizzando 
+la loss function esponenziale multiclasse trovata.
+
+\end{itemize}
+\end{frame}
+
+%slide 19
+\begin{frame}
+\frametitle{\yellow{Adaboost.MH}}
+\begin{itemize}
+ \item Sia \begin{math}
+     Y 
+    \end{math} un set finito di etichette, e sia \begin{math}
+                                                           k = |Y|
+                                                          \end{math}.
+\item Nel caso multi-label, ogni istanza \begin{math}
+     x \in X 
+    \end{math} pu\`o appartenere a diverse classi in \begin{math}
+                                                      Y
+                                                     \end{math}. Quindi, un esempio etichettato \`e una coppia 
+\begin{math}(x,\mathcal{Y})\end{math} dove \begin{math}
+                                  \mathcal{Y} \subseteq Y
+                                 \end{math} nel set di etichette assegnate a x.
+\item Lo scopo \`e di predire tutte e solo le etichette corrette. Ovvero, l'algoritmo 
+di apprendimento genera un'ipotesi che predice set di etichette, e la loss dipende su come queste predizioni 
+differiscono da una che \`e stata osservata. 
+\end{itemize}
+\end{frame}
+
+
+
+%slide20
+\begin{frame}
+\frametitle{\yellow{Adaboost.MH}}
+ \begin{itemize}
+  \item Perci\`o, 
+\begin{math} H : X \rightarrow 2^Y\end{math} e, rispetto alla distribuzione \begin{it} D\end{it} 
+la loss \`e:
+\begin{center}
+ \begin{math}
+ \frac{1}{k} E_{(x,Y) \sim  D} \left[|h(x) \mathcal{4} \mathcal{Y} | \right]
+ \end{math}
+\end{center}
+dove \begin{math}
+      \mathcal{4}
+     \end{math} denota la differenza simmetrica (il valore 1/k \`e utilizzato solo per assicurarsi che 
+il valore stia in \begin{math}
+                   \left[0,1\right]
+                  \end{math}).
+\item Chiamiamo questa misura \begin{it}
+                                                        Hamming loss
+                                                       \end{it} di H, e la denotiamo come
+\begin{math}
+ hloss_D(H)
+\end{math}.
+\item Per minimizzare la Hamming loss, si pu\`o, in maniera naturale, decomporre il problema in 
+\begin{it}k\end{it} problemi di classificazione binaria ortogonali. Si pensa a 
+\begin{math}\mathcal{Y}\end{math} come \begin{it}k\end{it} 
+etichette binarie (dipendendo da che un'etichetta \begin{it}y\end{it} sia o 
+non sia inclusa in \begin{math}\mathcal{Y}\end{math}). 
+Similmente, \begin{it}h(x)\end{it} pu\`o essere vista come \begin{it}k\end{it} predizioni binarie.
+ \end{itemize}
+
+\end{frame}
+
+
+
+
+%slide21
+\begin{frame}
+\frametitle{\yellow{Adaboost.MH}}
+ \begin{itemize}
+  \item La Hamming loss poi pu\`o essere considerata come una media dell'errore di \begin{it}h\end{it} su questi 
+\begin{it}k\end{it} problemi binari.
+\item Per  \begin{math} \mathcal{Y} \subseteq Y \end{math}, si definisce \begin{math}
+                                                                    \mathcal{Y}\left[l\right]
+                                                                   \end{math} per \begin{math}
+                                                                                   l \in Y
+                                                                                  \end{math} essere:
+\begin{center}
+ \begin{math}
+   \mathcal{Y}\left[l\right] = \begin{cases}1 & l \in \mathcal{Y}\\
+-1 & l\notin \mathcal{Y}\end{cases}
+ \end{math}
+
+\end{center}
+\item L'idea principale della riduzione \`e semplicemente ripetere ogni 
+esempio di training \begin{math}
+                     (x_i,Y_i)
+                    \end{math} per \begin{it}k\end{it} esempi 
+\begin{math}
+ ((x_i,l),Y_i\left[l\right])
+\end{math} per \begin{math}
+                l \in \mathcal{Y}
+               \end{math}.
+
+ \end{itemize}
+\end{frame}
+
+%slide22
+\begin{frame}
+\frametitle{\yellow{Adaboost.MH}}
+  \begin{itemize}
+ \item Dati: \begin{math}
+              (x_1,\mathcal{Y}_1), ..., (x_m,\mathcal{Y}_m)
+             \end{math} dove \begin{math}
+                              x_i \in X, \mathcal{Y}_i \subseteq Y
+                             \end{math}
+ \item Si inizializza \begin{math}
+                       D_1(i,l) = 1/(mk)
+                      \end{math}
+ \item Per t = 1, ..., T
+\end{itemize}
+
+\begin{enumerate}
+ \item Viene chiamato il weak learner utilizzando la distribuzione \begin{math}
+                                                             D_t
+                                                            \end{math}
+ \item Il weak learner, in risposta, genera un'ipotesi \begin{math}
+                               h_t : X \times Y \rightarrow \mathbb{R}
+                              \end{math}
+ \item Viene calcolato \begin{math}
+                \alpha_t \in \mathbb{R}
+               \end{math}
+\item Viene aggiornata:
+
+
+\begin{center}
+ \begin{math}
+  D_{t+1}(i,l) = \frac{D_t(i,l)exp(-\alpha_t Y_i\left[l\right] h_t (x_i,l))}{Z_t}
+ \end{math}
+\end{center}
+dove \begin{math}
+      Z_t
+     \end{math} \`e un fattore di normalizzazione
+\end{enumerate}
+L'output sar\`a:
+\begin{center}
+ \begin{math}
+  h_{fin}(x,l) = sign ( \sum_{t=1}^T \alpha_t h_t (x,l))
+ \end{math}
+
+\end{center}
+\end{frame}
+
+
+%slide 23
+\begin{frame}
+\frametitle{\yellow{Conclusioni}}
+\begin{itemize}
+\item Sono state analizzate alcune varianti del filtro Adaboost nel caso multiclasse.
+\item Per quanto riguarda lo studio effettuato durante il tirocinio, sebbene il calcio abbia il concetto multi-label, \`e stato scelto di utilizzare l'Adaboost.M2.
+\item Questo perch\`e ho dovuto evitare la fase di addestramento, avendo gi\`a i bookmakers che sono stati considerato come i classificatori weak istruiti.
+\item \`E stato mio compito quello di modificare il programma che implementa l'algoritmo per riconoscere i bookmakers come suoi classificatori deboli e non crearne di nuovi.
+\end{itemize}
+\end{frame}
+
+\end{document}
+
+
